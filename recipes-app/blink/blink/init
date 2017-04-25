@@ -1,0 +1,44 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:  blinkd
+# Required-Start:
+# Required-Stop:
+# Default-Start:  2 3 4 5
+# Default-Stop:  0 1 6
+# Short-Description: Continuously blink an LED
+### END INIT INFO
+
+DAEMON=/usr/sbin/blink
+NAME=blink
+DESC="Blink LED Daemon"
+PIDFILE=/var/run/${NAME}.pid
+GPIO_PIN=3
+
+test -x "$DAEMON" || exit 0
+
+case "$1" in
+  start)
+  echo -n "Starting $DESC: "
+  start-stop-daemon -S -q -p $PIDFILE \
+    --startas "$DAEMON" -- ${GPIO_PIN}
+  echo "$NAME."
+  ;;
+  stop)
+  echo -n "Stopping $DESC: "
+  start-stop-daemon -K -p $PIDFILE 
+  echo "$NAME."
+  ;;
+  restart|force-reload)
+  echo -n "Restarting $DESC: "
+  start-stop-daemon -K -q -p $PIDFILE
+  sleep 1
+  start-stop-daemon -S -q -p $PIDFILE --startas "$DAEMON" -- ${GPIO_PIN}
+  echo "$NAME."
+  ;;
+  *)
+  echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+  exit 1
+  ;;
+esac
+
+exit 0
